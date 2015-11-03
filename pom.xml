@@ -16,11 +16,115 @@
         <hsqldb.version>2.3.2</hsqldb.version>
         <h2.version>1.4.187</h2.version>
         <derby.version>10.11.1.1</derby.version>
+        <mysql.version>5.1.37</mysql.version>
+        <oracle.version>14</oracle.version>
+        <postgre.version>9.1-901-1.jdbc4</postgre.version>
         <jcl.slf4j.version>1.7.12</jcl.slf4j.version>
         <junit.version>4.12</junit.version>
         <dbcp.version>2.1</dbcp.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    
+    <profiles>
+        
+        <profile>
+            <id>H2</id>
+            
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <version>${h2.version}</version>
+                </dependency>
+            </dependencies>
+            
+        </profile>
+        
+        <profile>
+            <id>Derby</id>
+            
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.derby</groupId>
+                    <artifactId>derby</artifactId>
+                    <version>${derby.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        
+        <profile>
+            <id>HSQL</id>
+            
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <version>${hsqldb.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        
+        <profile>
+            <id>PostgreSQL</id>
+            
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <version>${postgre.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        
+        <profile>
+            <id>MySQL</id>
+            
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                    <version>${mysql.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        
+        <profile>
+            <id>Oracle</id>
+            
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>ojdbc</groupId>
+                    <artifactId>ojdbc</artifactId>
+                    <version>${oracle.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        
+    </profiles>
 
     <dependencies>
         <dependency>
@@ -54,27 +158,6 @@
             <version>${spring.version}</version>
         </dependency>
 		
-        <!-- H2 DB -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
-        </dependency>
-
-        <!-- Derby DB -->
-        <!--        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>${derby.version}</version>
-        </dependency>-->
-
-        <!-- HSQL -->
-        <!--                <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.2.9</version>
-        </dependency>-->
-
         <!--  connection polls -->
         <dependency>
             <groupId>org.apache.commons</groupId>
