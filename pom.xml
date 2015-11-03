@@ -62,11 +62,18 @@
         </dependency>
 
         <!-- Derby DB -->
-        <dependency>
+        <!--        <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>${derby.version}</version>
-        </dependency>
+        </dependency>-->
+
+        <!-- HSQL -->
+        <!--                <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.2.9</version>
+        </dependency>-->
 
         <!--  connection polls -->
         <dependency>
@@ -82,11 +89,7 @@
             <version>3.2.3.ga</version>
         </dependency>   
 
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.2.9</version>
-        </dependency>
+
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-annotations</artifactId>
