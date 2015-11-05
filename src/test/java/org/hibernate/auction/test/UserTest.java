@@ -17,6 +17,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 import org.apache.log4j.Level;
+import org.hibernate.Hibernate;
 import org.hibernate.auction.dao.ItemDAO;
 import org.hibernate.auction.dao.UserDAO;
 import org.hibernate.auction.model.Item;
@@ -39,7 +40,7 @@ public class UserTest extends TestCaseWithData {
         LogHelper.disableLogging();
         super.setUp();
         initData();
-        LogHelper.enableLogging(Level.DEBUG);
+        LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
     }
 
     protected void tearDown() throws Exception {
@@ -87,6 +88,33 @@ public class UserTest extends TestCaseWithData {
 
         HibernateUtil.commitTransaction();
 
+    }
+
+    public void testUserItemsInitialization() throws Exception {
+        System.out.println("******************** testUserItemsInitialization ********************");
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.getUserById(1l, false);
+
+        assertFalse(Hibernate.isInitialized(user.getItems()));
+        Set<Item> items = user.getItems();
+        assertFalse(Hibernate.isInitialized(items));
+
+        Item item = (Item) items.toArray()[0];
+        assertTrue(Hibernate.isInitialized(items));
+        assertNotNull(item.getName());
+
+        User user2 = userDAO.getUserById(1l, false);
+        assertTrue(user == user2);
+
+        userDAO.evict(user);
+
+        User user3 = userDAO.getUserById(1l, false);
+        assertFalse(user == user3);
+
+        items = user3.getItems();
+        assertFalse(Hibernate.isInitialized(items));
+        Hibernate.initialize(items);
+        assertTrue(Hibernate.isInitialized(items));
     }
 
     public static Test suite() {

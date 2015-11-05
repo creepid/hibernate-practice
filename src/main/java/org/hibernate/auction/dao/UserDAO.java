@@ -15,81 +15,84 @@ import java.util.Collection;
  */
 public class UserDAO {
 
-	public UserDAO() {
-		HibernateUtil.beginTransaction();
-	}
+    public UserDAO() {
+        HibernateUtil.beginTransaction();
+    }
 
-	// ********************************************************** //
+    // ********************************************************** //
+    public User getUserById(Long userId, boolean lock)
+            throws InfrastructureException {
 
-	public User getUserById(Long userId, boolean lock)
-			throws InfrastructureException {
+        Session session = HibernateUtil.getSession();
+        User user = null;
+        try {
+            if (lock) {
+                user = (User) session.load(User.class, userId, LockMode.UPGRADE);
+            } else {
+                user = (User) session.load(User.class, userId);
+            }
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+        return user;
+    }
 
-		Session session = HibernateUtil.getSession();
-		User user = null;
-		try {
-			if (lock) {
-				user = (User) session.load(User.class, userId, LockMode.UPGRADE);
-			} else {
-				user = (User) session.load(User.class, userId);
-			}
-		}  catch (HibernateException ex) {
-			throw new InfrastructureException(ex);
-		}
-		return user;
-	}
+    // ********************************************************** //
+    public Collection findAll()
+            throws InfrastructureException {
 
-	// ********************************************************** //
+        Collection users;
+        try {
+            users = HibernateUtil.getSession().createCriteria(User.class).list();
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+        return users;
+    }
 
-	public Collection findAll()
-			throws InfrastructureException {
+    // ********************************************************** //
+    public Collection findByExample(User exampleUser)
+            throws InfrastructureException {
 
-		Collection users;
-		try {
-			users = HibernateUtil.getSession().createCriteria(User.class).list();
-		} catch (HibernateException ex) {
-			throw new InfrastructureException(ex);
-		}
-		return users;
-	}
+        Collection users;
+        try {
+            Criteria crit = HibernateUtil.getSession().createCriteria(User.class);
+            users = crit.add(Example.create(exampleUser)).list();
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+        return users;
+    }
 
-	// ********************************************************** //
+    // ********************************************************** //
+    public void makePersistent(User user)
+            throws InfrastructureException {
 
-	public Collection findByExample(User exampleUser)
-			throws InfrastructureException {
+        try {
+            HibernateUtil.getSession().saveOrUpdate(user);
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+    }
 
-		Collection users;
-		try {
-			Criteria crit = HibernateUtil.getSession().createCriteria(User.class);
-			users = crit.add(Example.create(exampleUser)).list();
-		} catch (HibernateException ex) {
-			throw new InfrastructureException(ex);
-		}
-		return users;
-	}
+    // ********************************************************** //
+    public void makeTransient(User user)
+            throws InfrastructureException {
 
-	// ********************************************************** //
+        try {
+            HibernateUtil.getSession().delete(user);
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+    }
 
-	public void makePersistent(User user)
-			throws InfrastructureException {
-
-		try {
-			HibernateUtil.getSession().saveOrUpdate(user);
-		} catch (HibernateException ex) {
-			throw new InfrastructureException(ex);
-		}
-	}
-
-	// ********************************************************** //
-
-	public void makeTransient(User user)
-			throws InfrastructureException {
-
-		try {
-			HibernateUtil.getSession().delete(user);
-		} catch (HibernateException ex) {
-			throw new InfrastructureException(ex);
-		}
-	}
-
+    public void evict(User user)
+            throws InfrastructureException {
+        try {
+            HibernateUtil.getSession().evict(user);
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+    }
 
 }
