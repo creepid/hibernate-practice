@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import junit.framework.Test;
@@ -18,13 +19,18 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 import org.apache.log4j.Level;
 import org.hibernate.Hibernate;
+import org.hibernate.auction.dao.BillingDetailsDAO;
 import org.hibernate.auction.dao.ItemDAO;
 import org.hibernate.auction.dao.UserDAO;
+import org.hibernate.auction.model.BankAccount;
+import org.hibernate.auction.model.BillingDetails;
+import org.hibernate.auction.model.CreditCard;
 import org.hibernate.auction.model.Item;
 import org.hibernate.auction.model.MonetaryAmount;
 import org.hibernate.auction.model.User;
 import org.hibernate.auction.persistence.HibernateUtil;
 import org.hibernate.auction.util.LogHelper;
+import org.hibernate.proxy.HibernateProxy;
 
 /**
  *
@@ -32,19 +38,18 @@ import org.hibernate.auction.util.LogHelper;
  */
 public class UserTest extends TestCaseWithData {
 
-    public UserTest(String x) {
+    public UserTest(String x) throws Exception {
         super(x);
-    }
-
-    protected void setUp() throws Exception {
         LogHelper.disableLogging();
         super.setUp();
         initData();
         LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
     }
 
+    protected void setUp() throws Exception {
+    }
+
     protected void tearDown() throws Exception {
-        super.tearDown();
         HibernateUtil.closeSession();
     }
 
@@ -115,6 +120,68 @@ public class UserTest extends TestCaseWithData {
         assertFalse(Hibernate.isInitialized(items));
         Hibernate.initialize(items);
         assertTrue(Hibernate.isInitialized(items));
+    }
+
+    public void testLoadUserWithBillingDetails() {
+        System.out.println("******************** testLoadUserWithBillingDetails ********************");
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.loadUserById(1l, false);
+
+        Set<BillingDetails> billingDetails = user.getBillingDetails();
+        Iterator<BillingDetails> billingIterator = billingDetails.iterator();
+
+        while (billingIterator.hasNext()) {
+            BillingDetails details = billingIterator.next();
+            if (details instanceof BankAccount) {
+                BankAccount account = (BankAccount) details;
+                assertEquals("FooBar Rich Bank", account.getBankName());
+                assertEquals("234234234234", account.getNumber());
+            }
+
+            if (details instanceof CreditCard) {
+                CreditCard cc = (CreditCard) details;
+                assertEquals("1234567890", cc.getNumber());
+            }
+
+            if (details instanceof HibernateProxy) {
+                HibernateProxy proxy = (HibernateProxy) details;
+                Object proxyImpl = proxy.getHibernateLazyInitializer().getImplementation();
+                if (proxyImpl instanceof CreditCard) {
+                    CreditCard cc = (CreditCard) proxyImpl;
+                    assertEquals("1234567890", cc.getNumber());
+                } else {
+                    fail("Proxy is not a CreditCard");
+                }
+            }
+        }
+
+        BillingDetails defaultBillingDetails = user.getDefaultBillingDetails();
+        if (defaultBillingDetails instanceof HibernateProxy) {
+            HibernateProxy proxy = (HibernateProxy) defaultBillingDetails;
+            Object proxyImpl = proxy.getHibernateLazyInitializer().getImplementation();
+            if (proxyImpl instanceof CreditCard) {
+                CreditCard cc = (CreditCard) proxyImpl;
+                assertEquals("1234567890", cc.getNumber());
+            } else {
+                fail("Proxy is not a CreditCard");
+            }
+        } else {
+            fail("DefaultBillingDetails is not a proxy");
+        }
+
+        //HibernateUtil.closeSession();
+        BillingDetailsDAO billingDetailsDAO = new BillingDetailsDAO();
+        BillingDetails billingDetails1 = billingDetailsDAO.getBillingDetailsById(1l, false);
+        assertNotNull(billingDetails1);
+        assertTrue(billingDetails1.getUser() == user);
+
+        user.removeBillingDetails(billingDetails1);
+        HibernateUtil.getSession().flush();
+
+        //BillingDetails billingDetails2 = billingDetailsDAO.loadBillingDetailsById(1l, false);
+        BillingDetails billingDetails2 = billingDetailsDAO.getBillingDetailsById(1l, false);
+        assertNull(billingDetails2);
+
     }
 
     public static Test suite() {

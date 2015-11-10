@@ -45,7 +45,7 @@ public class ItemTest extends TestCaseWithData {
 		try {
 			BigDecimal bidAmount = new BigDecimal("99.99");
 			MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
-			a2.placeBid(userDAO.getUserById(u3.getId(), false),
+			a2.placeBid(userDAO.loadUserById(u3.getId(), false),
 									newAmount,
 									currentMaxBid,
 									currentMinBid);
@@ -64,7 +64,7 @@ public class ItemTest extends TestCaseWithData {
 		try {
 			BigDecimal bidAmount = new BigDecimal("100.00");
 			MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
-			a2.placeBid(userDAO.getUserById(u3.getId(), false),
+			a2.placeBid(userDAO.loadUserById(u3.getId(), false),
 									newAmount,
 									currentMaxBid,
 									currentMinBid);
@@ -77,7 +77,7 @@ public class ItemTest extends TestCaseWithData {
 		try {
 			BigDecimal bidAmount = new BigDecimal("99.99");
 			MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
-			a2.placeBid(userDAO.getUserById(u3.getId(), false),
+			a2.placeBid(userDAO.loadUserById(u3.getId(), false),
 									newAmount,
 									currentMaxBid,
 									currentMinBid);

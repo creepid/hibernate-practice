@@ -20,7 +20,7 @@ public class UserDAO {
     }
 
     // ********************************************************** //
-    public User getUserById(Long userId, boolean lock)
+    public User loadUserById(Long userId, boolean lock)
             throws InfrastructureException {
 
         Session session = HibernateUtil.getSession();
@@ -30,6 +30,23 @@ public class UserDAO {
                 user = (User) session.load(User.class, userId, LockMode.UPGRADE);
             } else {
                 user = (User) session.load(User.class, userId);
+            }
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+        return user;
+    }
+
+    public User getUserById(Long userId, boolean lock)
+            throws InfrastructureException {
+
+        Session session = HibernateUtil.getSession();
+        User user = null;
+        try {
+            if (lock) {
+                user = (User) session.get(User.class, userId, LockMode.UPGRADE);
+            } else {
+                user = (User) session.get(User.class, userId);
             }
         } catch (HibernateException ex) {
             throw new InfrastructureException(ex);
@@ -90,6 +107,15 @@ public class UserDAO {
             throws InfrastructureException {
         try {
             HibernateUtil.getSession().evict(user);
+        } catch (HibernateException ex) {
+            throw new InfrastructureException(ex);
+        }
+    }
+
+    public void delete(User user)
+            throws InfrastructureException {
+        try {
+            HibernateUtil.getSession().delete(user);
         } catch (HibernateException ex) {
             throw new InfrastructureException(ex);
         }

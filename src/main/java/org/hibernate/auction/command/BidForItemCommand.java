@@ -49,7 +49,7 @@ public class BidForItemCommand implements Command {
 			Bid currentMinBid = itemDAO.getMinBid(itemId);
 
 			Item item = itemDAO.getItemById(itemId, true);
-			newBid = item.placeBid(userDAO.getUserById(userId, false),
+			newBid = item.placeBid(userDAO.loadUserById(userId, false),
 									newAmount,
 									currentMaxBid,
 			                        currentMinBid);
