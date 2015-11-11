@@ -12,13 +12,16 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import junit.framework.Test;
+import static junit.framework.TestCase.assertNotNull;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 import org.apache.log4j.Level;
 import org.hibernate.Hibernate;
+import org.hibernate.Session;
 import org.hibernate.auction.dao.BillingDetailsDAO;
 import org.hibernate.auction.dao.ItemDAO;
 import org.hibernate.auction.dao.UserDAO;
@@ -182,6 +185,131 @@ public class UserTest extends TestCaseWithData {
         BillingDetails billingDetails2 = billingDetailsDAO.getBillingDetailsById(1l, false);
         assertNull(billingDetails2);
 
+    }
+
+    /**
+     * There are four fetching strategies
+     *
+     * 1. fetch-“join” = Disable the lazy loading, always load all the
+     * collections and entities.
+     *
+     * 2. fetch-“select” (default) = Lazy load all the collections and entities.
+     *
+     * 3. batch-size=”N” = Fetching up to ‘N’ collections or entities, *Not
+     * record*.
+     *
+     * 4. fetch-“subselect” = Group its collection into a sub select statement.
+     */
+    /**
+     * fetch=”select” or @Fetch(FetchMode.SELECT). This is the default fetching
+     * strategy. it enabled the lazy loading of all it’s related collections.
+     * Let see the example…
+     *
+     */
+    /**
+     * fetch=”join” or @Fetch(FetchMode.JOIN). The “join” fetching strategy will
+     * disabled the lazy loading of all it’s related collections. Let see the
+     * example.
+     *
+     */
+    public void testUserFetchingStrategies() {
+        System.out.println("******************** testUserFetchingStrategies *******************");
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.loadUserById(1l, false);
+
+        for (Iterator iter = user.getItems().iterator(); iter.hasNext();) {
+            Item item = (Item) iter.next();
+            assertNotNull(item.getId());
+            assertNotNull(item.getName());
+        }
+
+    }
+
+    /**
+     * batch-size=”10″ or @BatchSize(size = 10). This ‘batch size’ fetching
+     * strategy is always misunderstanding by many Hibernate developers. Let see
+     * the *misunderstand* concept here… The batch-size did nothing here, it is
+     * not how batch-size work. See this statement.
+     *
+     * — Repeat N times until you remember this statement —
+     *
+     * The batch-size fetching strategy is not define how many records inside in
+     * the collections are loaded. Instead, it defines how many collections
+     * should be loaded.
+     *
+     * — Repeat N times until you remember this statement —
+     *
+     *
+     */
+    /**
+     * No batch-size fetching strategy.
+     *
+     * If you have 20 users records in the database, the Hibernate’s default
+     * fetching strategies will generate 20+1 select statements and hit the
+     * database.
+     *
+     * 1. Select statement to retrieve all the User records.
+     *
+     * 2. Select its related collection
+     *
+     * 3. Select its related collection
+     *
+     * 4. Select its related collection
+     *
+     * ….
+     *
+     * 21.Select its related collection
+     *
+     * The generated queries are not efficient and caused a serious performance
+     * issue.
+     *
+     */
+    /**
+     * Enabled the batch-size=’10’ fetching strategy.
+     *
+     * Now, Hibernate will per-fetch the collections, with a select *in*
+     * statement. If you have 20 stock records, it will generate 3 select
+     * statements.
+     *
+     * 1. Select statement to retrieve all the Stock records.
+     *
+     * 2. Select In statement to per-fetch its related collections (10
+     * collections a time)
+     *
+     * 3. Select In statement to per-fetch its related collections (next 10
+     * collections a time)
+     *
+     * With batch-size enabled, it simplify the select statements from 21 select
+     * statements to 3 select statements.
+     */
+    /**
+     * fetch=”subselect” or @Fetch(FetchMode.SUBSELECT).
+     *
+     * This fetching strategy is enable all its related collection in a sub
+     * select statement. Let see the same query again.
+     *
+     * With “subselect” enabled, it will create two select statements.
+     *
+     * 1. Select statement to retrieve all the Stock records.
+     *
+     * 2. Select all its related collections in a sub select query.
+     */
+    @org.junit.Test
+    public void testUserBatchItems() {
+        System.out.println("******************* testUserBatchItems ********************");
+        Session session = HibernateUtil.getSession();
+        List<User> list = session.createQuery("from User").list();
+
+        for (User user : list) {
+            Set items = user.getItems();
+
+            for (Iterator iter = items.iterator(); iter.hasNext();) {
+                Item item = (Item) iter.next();
+                assertNotNull(item.getId());
+                assertNotNull(item.getName());
+            }
+
+        }
     }
 
     public static Test suite() {
