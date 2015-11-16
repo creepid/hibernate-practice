@@ -170,7 +170,7 @@ public class DirectSetAccessor implements PropertyAccessor {
 
                 }
 
-				// if not "get" then try "is"
+                // if not "get" then try "is"
 				/*boolean isBoolean = methods[i].getReturnType().equals(Boolean.class) ||
                  methods[i].getReturnType().equals(boolean.class);*/
                 if (methodName.startsWith("is")) {

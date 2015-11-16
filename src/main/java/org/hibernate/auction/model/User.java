@@ -40,6 +40,7 @@ public class User implements Serializable, Comparable {
     private Set billingDetails = new HashSet();
     private BillingDetails defaultBillingDetails;
     private boolean admin = false;
+    private String motto;
 
     /**
      * No-arg constructor for JavaBean tools.
@@ -249,6 +250,14 @@ public class User implements Serializable, Comparable {
 
     public void clearCreatedDate() {
         this.created = null;
+    }
+
+    public String getMotto() {
+        return motto;
+    }
+
+    public void setMotto(String motto) {
+        this.motto = motto;
     }
 
 }

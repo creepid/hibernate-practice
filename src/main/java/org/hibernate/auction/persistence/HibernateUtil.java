@@ -9,6 +9,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.mapping.PersistentClass;
+import org.hibernate.metadata.ClassMetadata;
 
 /**
  * Basic Hibernate helper class, handles SessionFactory, Session and
@@ -257,6 +259,14 @@ public class HibernateUtil {
         Interceptor interceptor
                 = (Interceptor) threadInterceptor.get();
         return interceptor;
+    }
+
+    public static PersistentClass getClassMapping(Class entityClass) {
+        return getConfiguration().getClassMapping(entityClass.getName());
+    }
+
+    public static ClassMetadata getClassMetadata(Class entityClass) {
+        return getSessionFactory().getClassMetadata(entityClass.getName());
     }
 
 }

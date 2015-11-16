@@ -33,6 +33,11 @@ import org.hibernate.auction.model.MonetaryAmount;
 import org.hibernate.auction.model.User;
 import org.hibernate.auction.persistence.HibernateUtil;
 import org.hibernate.auction.util.LogHelper;
+import org.hibernate.mapping.Column;
+import org.hibernate.mapping.PersistentClass;
+import org.hibernate.mapping.Property;
+import org.hibernate.mapping.SimpleValue;
+import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
 
 /**
@@ -310,6 +315,45 @@ public class UserTest extends TestCaseWithData {
             }
 
         }
+    }
+    
+    public void /*test*/AddNewProperty() {
+        System.out.println("******************* testAddNewProperty ********************");
+        PersistentClass userMapping = HibernateUtil.getClassMapping(User.class);
+
+        Column column = new Column();
+        column.setName("MOTTO");
+        column.setNullable(false);
+        column.setUnique(true);
+        column.setSqlType("VARCHAR");
+        userMapping.getTable().addColumn(column);
+
+        SimpleValue value = new SimpleValue();
+        value.setTable(userMapping.getTable());
+        value.addColumn(column);
+        value.setTypeName("string");
+
+        Property prop = new Property();
+        prop.setValue(value);
+        prop.setName("motto");
+        prop.setPropertyAccessorName("field");
+        prop.setNodeName(prop.getName());
+        userMapping.addProperty(prop);
+        
+        HibernateUtil.rebuildSessionFactory();
+
+        ClassMetadata metadata = HibernateUtil.getClassMetadata(User.class);
+        String[] propNames = metadata.getPropertyNames();
+        boolean mottoFound = false;
+        for (int i = 0; i < propNames.length; i++) {
+            String propName = propNames[i];
+            if (propName.equalsIgnoreCase("motto")) {
+                mottoFound = true;
+                break;
+            }
+        }
+
+        assertTrue(mottoFound);
     }
 
     public static Test suite() {
