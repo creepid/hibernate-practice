@@ -188,7 +188,8 @@ public class User implements Serializable, Comparable {
             getBillingDetails().remove(billingDetails);
             setDefaultBillingDetails((BillingDetails) getBillingDetails().iterator().next());
         } else {
-            throw new BusinessException("Please set new default BillingDetails first");
+            getBillingDetails().remove(billingDetails);
+            setDefaultBillingDetails(null);
         }
     }
 

@@ -25,9 +25,11 @@ import org.hibernate.Session;
 import org.hibernate.auction.dao.BillingDetailsDAO;
 import org.hibernate.auction.dao.ItemDAO;
 import org.hibernate.auction.dao.UserDAO;
+import org.hibernate.auction.model.Address;
 import org.hibernate.auction.model.BankAccount;
 import org.hibernate.auction.model.BillingDetails;
 import org.hibernate.auction.model.CreditCard;
+import org.hibernate.auction.model.CreditCardType;
 import org.hibernate.auction.model.Item;
 import org.hibernate.auction.model.MonetaryAmount;
 import org.hibernate.auction.model.User;
@@ -50,7 +52,7 @@ public class UserTest extends TestCaseWithData {
         super(x);
         LogHelper.disableLogging();
         super.setUp();
-        initData();
+        //initData();
         LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
     }
 
@@ -61,7 +63,7 @@ public class UserTest extends TestCaseWithData {
         HibernateUtil.closeSession();
     }
 
-    public void testUserWithItems() throws Exception {
+    public void /*test*/ UserWithItems() throws Exception {
         System.out.println("******************** testUserWithItems ********************");
 
         UserDAO userDAO = new UserDAO();
@@ -103,7 +105,7 @@ public class UserTest extends TestCaseWithData {
 
     }
 
-    public void testUserItemsInitialization() throws Exception {
+    public void /*test*/ UserItemsInitialization() throws Exception {
         System.out.println("******************** testUserItemsInitialization ********************");
         UserDAO userDAO = new UserDAO();
         User user = userDAO.getUserById(1l, false);
@@ -130,7 +132,7 @@ public class UserTest extends TestCaseWithData {
         assertTrue(Hibernate.isInitialized(items));
     }
 
-    public void testLoadUserWithBillingDetails() {
+    public void /*test*/ LoadUserWithBillingDetails() {
         System.out.println("******************** testLoadUserWithBillingDetails ********************");
         UserDAO userDAO = new UserDAO();
         User user = userDAO.loadUserById(1l, false);
@@ -217,7 +219,7 @@ public class UserTest extends TestCaseWithData {
      * example.
      *
      */
-    public void testUserFetchingStrategies() {
+    public void /*test*/ UserFetchingStrategies() {
         System.out.println("******************** testUserFetchingStrategies *******************");
         UserDAO userDAO = new UserDAO();
         User user = userDAO.loadUserById(1l, false);
@@ -300,7 +302,7 @@ public class UserTest extends TestCaseWithData {
      * 2. Select all its related collections in a sub select query.
      */
     @org.junit.Test
-    public void testUserBatchItems() {
+    public void /*test*/ UserBatchItems() {
         System.out.println("******************* testUserBatchItems ********************");
         Session session = HibernateUtil.getSession();
         List<User> list = session.createQuery("from User").list();
@@ -316,8 +318,8 @@ public class UserTest extends TestCaseWithData {
 
         }
     }
-    
-    public void /*test*/AddNewProperty() {
+
+    public void /*test*/ AddNewProperty() {
         System.out.println("******************* testAddNewProperty ********************");
         PersistentClass userMapping = HibernateUtil.getClassMapping(User.class);
 
@@ -339,7 +341,7 @@ public class UserTest extends TestCaseWithData {
         prop.setPropertyAccessorName("field");
         prop.setNodeName(prop.getName());
         userMapping.addProperty(prop);
-        
+
         HibernateUtil.rebuildSessionFactory();
 
         ClassMetadata metadata = HibernateUtil.getClassMetadata(User.class);
@@ -354,6 +356,189 @@ public class UserTest extends TestCaseWithData {
         }
 
         assertTrue(mottoFound);
+    }
+
+    /**
+     * No save-update cascade. If you want to save the ‘User’ and its referenced
+     * ‘UserBillingDetails’ into database, you need to save both individually.
+     */
+    public void /*test*/ BillingDetailsCascadeNone() {
+        User u1 = new User("Christian", "Bauer", "turin", "abc123", "christian@hibernate.org");
+        u1.setAddress(new Address("Foo", "12345", "Bar"));
+        u1.setAdmin(true);
+
+        BillingDetails ccOne = new CreditCard("Christian  Bauer", u1, "1234567890",
+                CreditCardType.MASTERCARD, "10", "2005");
+        u1.addBillingDetails(ccOne);
+
+        HibernateUtil.getSession().save(u1);
+        //HibernateUtil.getSession().save(ccOne);
+    }
+
+    /**
+     * With save-update cascade. The cascade=”save-update” is declared in
+     * ‘BillingDetails’ to enable the save-update cascade effect..
+     */
+    public void /*test*/ BillingDetailsCascadeSaveUpdate() {
+        User u1 = new User("Christian", "Bauer", "turin", "abc123", "christian@hibernate.org");
+        u1.setAddress(new Address("Foo", "12345", "Bar"));
+        u1.setAdmin(true);
+
+        BillingDetails ccOne = new CreditCard("Christian  Bauer", u1, "1234567890",
+                CreditCardType.MASTERCARD, "10", "2005");
+        u1.addBillingDetails(ccOne);
+
+        HibernateUtil.getSession().save(u1);
+    }
+
+    /**
+     * No delete cascade. You need to loop all the ‘BillingDetails’ and delete
+     * it one by one.
+     */
+    public void /*test*/ BillingDetailsNoCascadeDelete() throws Exception {
+        LogHelper.disableLogging();
+        User u1 = new User("Christian", "Bauer", "turin", "abc123", "christian@hibernate.org");
+        u1.setAddress(new Address("Foo", "12345", "Bar"));
+        u1.setAdmin(true);
+
+        BillingDetails ccOne = new CreditCard("Christian  Bauer", u1, "1234567890",
+                CreditCardType.MASTERCARD, "10", "2005");
+        u1.addBillingDetails(ccOne);
+
+        HibernateUtil.getSession().save(u1);
+        HibernateUtil.getSession().save(ccOne);
+
+        HibernateUtil.getSession().flush();
+
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.loadUserById(1l, false);
+
+        Set details = user.getBillingDetails();
+
+        for (Object detail : details) {
+            BillingDetails billingDetails = (BillingDetails) detail;
+            LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
+            HibernateUtil.getSession().delete(billingDetails);
+            LogHelper.disableLogging();
+        }
+        LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
+
+        HibernateUtil.getSession().delete(user);
+
+        HibernateUtil.getSession().flush();
+    }
+
+    /**
+     * With delete cascade. The cascade=”delete” is declared in ‘BillingDetails’
+     * to enable the delete cascade effect. When you delete the ‘User’, all its
+     * reference ‘BillingDetails’ will be deleted automatically.
+     */
+    public void /*test*/ BillingDetailsWithCascadeDelete() throws Exception {
+        LogHelper.disableLogging();
+        User u1 = new User("Christian", "Bauer", "turin", "abc123", "christian@hibernate.org");
+        u1.setAddress(new Address("Foo", "12345", "Bar"));
+        u1.setAdmin(true);
+
+        BillingDetails ccOne = new CreditCard("Christian  Bauer", u1, "1234567890",
+                CreditCardType.MASTERCARD, "10", "2005");
+        u1.addBillingDetails(ccOne);
+
+        HibernateUtil.getSession().save(u1);
+        HibernateUtil.getSession().save(ccOne);
+
+        HibernateUtil.getSession().flush();
+
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.loadUserById(1l, false);
+
+        LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
+
+        HibernateUtil.getSession().delete(user);
+        HibernateUtil.getSession().flush();
+    }
+
+    /**
+     * No delete-orphan cascade. You need to delete the ‘BillingDetails’ one by
+     * one.
+     */
+    public void /*test*/ BillingDetailsNoDeleteOrphanCascade() throws Exception {
+        LogHelper.disableLogging();
+        User u1 = new User("Christian", "Bauer", "turin", "abc123", "christian@hibernate.org");
+        u1.setAddress(new Address("Foo", "12345", "Bar"));
+        u1.setAdmin(true);
+
+        BillingDetails ccOne = new CreditCard("Christian  Bauer", u1, "1234567890",
+                CreditCardType.MASTERCARD, "10", "2005");
+        u1.addBillingDetails(ccOne);
+
+        HibernateUtil.getSession().save(u1);
+        HibernateUtil.getSession().save(ccOne);
+
+        HibernateUtil.getSession().flush();
+
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.loadUserById(1l, false);
+
+        Set details = user.getBillingDetails();
+
+        for (Object detail : details) {
+            BillingDetails billingDetails = (BillingDetails) detail;
+            
+            LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
+            
+            user.removeBillingDetails(billingDetails);
+            HibernateUtil.getSession().delete(billingDetails);
+            
+            LogHelper.disableLogging();
+        }
+        LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
+        
+        HibernateUtil.getSession().flush();
+    }
+
+    /**
+     * With delete-orphan cascade. The cascade=”delete-orphan” is declared in
+     * ‘billingDetails’ to enable the delete orphan cascade effect. When you
+     * save or update the User, it will remove those ‘billingDetails’ which
+     * already mark as removed.
+     *
+     * In short, delete-orphan allow parent table to delete few records (delete
+     * orphan) in its child table.
+     *
+     */
+    public void /*test*/ BillingDetailsWithDeleteOrphanCascade() throws Exception {
+        LogHelper.disableLogging();
+        User u1 = new User("Christian", "Bauer", "turin", "abc123", "christian@hibernate.org");
+        u1.setAddress(new Address("Foo", "12345", "Bar"));
+        u1.setAdmin(true);
+
+        HibernateUtil.getSession().save(u1);
+
+        BillingDetails ccOne = new CreditCard("Christian  Bauer", u1, "1234567890",
+                CreditCardType.MASTERCARD, "10", "2005");
+        u1.addBillingDetails(ccOne);
+
+        HibernateUtil.getSession().save(ccOne);
+
+        HibernateUtil.getSession().flush();
+
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.loadUserById(1l, false);
+
+        Set details = user.getBillingDetails();
+
+        for (Object detail : details) {
+            LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
+
+            user.getBillingDetails().remove(detail);
+            user.setDefaultBillingDetails(null);
+
+            LogHelper.disableLogging();
+        }
+
+        LogHelper.setLogging("org.hibernate.SQL", Level.DEBUG);
+        HibernateUtil.getSession().saveOrUpdate(u1);
+        HibernateUtil.getSession().flush();
     }
 
     public static Test suite() {

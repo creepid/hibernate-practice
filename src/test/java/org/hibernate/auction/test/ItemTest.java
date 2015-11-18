@@ -11,97 +11,97 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class ItemTest extends TestCaseWithData {
-    
+
         // ********************************************************** //
 
 	public void testItemData() throws Exception {
-		initData();
+        initData();
 
-		ItemDAO itemDAO = new ItemDAO();
+        ItemDAO itemDAO = new ItemDAO();
 
-		Item a1 = itemDAO.getItemById(auctionOne.getId(), false);
-		assertEquals(a1.getInitialPrice(),
-		             new MonetaryAmount(new BigDecimal("1.99"), Currency.getInstance(Locale.US)));
+        Item a1 = itemDAO.getItemById(auctionOne.getId(), false);
+        assertEquals(a1.getInitialPrice(),
+                new MonetaryAmount(new BigDecimal("1.99"), Currency.getInstance(Locale.US)));
 
-		HibernateUtil.commitTransaction();
-		HibernateUtil.closeSession();
-	}
+        HibernateUtil.commitTransaction();
+        HibernateUtil.closeSession();
+    }
 
-	// ********************************************************** //
+    // ********************************************************** //
 
 	public void testPlaceBid() throws Exception {
-		initData();
+        initData();
 
-		// TODO: Test doesn't consider currency properly!
+        // TODO: Test doesn't consider currency properly!
 
-		ItemDAO itemDAO = new ItemDAO();
-		UserDAO userDAO = new UserDAO();
+        ItemDAO itemDAO = new ItemDAO();
+        UserDAO userDAO = new UserDAO();
 
-		Bid currentMaxBid = itemDAO.getMaxBid(auctionTwo.getId());
-		Bid currentMinBid = itemDAO.getMinBid(auctionTwo.getId());
-		Item a2 = itemDAO.getItemById(auctionTwo.getId(), true);
+        Bid currentMaxBid = itemDAO.getMaxBid(auctionTwo.getId());
+        Bid currentMinBid = itemDAO.getMinBid(auctionTwo.getId());
+        Item a2 = itemDAO.getItemById(auctionTwo.getId(), true);
 
-		// Fail, auction is not active yet
-		try {
-			BigDecimal bidAmount = new BigDecimal("99.99");
-			MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
-			a2.placeBid(userDAO.loadUserById(u3.getId(), false),
-									newAmount,
-									currentMaxBid,
-									currentMinBid);
+        // Fail, auction is not active yet
+        try {
+            BigDecimal bidAmount = new BigDecimal("99.99");
+            MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
+            a2.placeBid(userDAO.loadUserById(u3.getId(), false),
+                    newAmount,
+                    currentMaxBid,
+                    currentMinBid);
 		} catch (BusinessException success) {}
 
-		// Fail, user isn't an admin
-		try {
-			a2.approve(u3);
+        // Fail, user isn't an admin
+        try {
+            a2.approve(u3);
 		} catch (PermissionException success) {}
 
-		// Success, set active
-		a2.setPendingForApproval();
-		a2.approve(u1);
+        // Success, set active
+        a2.setPendingForApproval();
+        a2.approve(u1);
 
-		// Success, place a bid
-		try {
-			BigDecimal bidAmount = new BigDecimal("100.00");
-			MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
-			a2.placeBid(userDAO.loadUserById(u3.getId(), false),
-									newAmount,
-									currentMaxBid,
-									currentMinBid);
+        // Success, place a bid
+        try {
+            BigDecimal bidAmount = new BigDecimal("100.00");
+            MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
+            a2.placeBid(userDAO.loadUserById(u3.getId(), false),
+                    newAmount,
+                    currentMaxBid,
+                    currentMinBid);
 
-		} catch (BusinessException failure) {
-			throw failure;
-		}
+        } catch (BusinessException failure) {
+            throw failure;
+        }
 
-		// Fail, bid amount is too low
-		try {
-			BigDecimal bidAmount = new BigDecimal("99.99");
-			MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
-			a2.placeBid(userDAO.loadUserById(u3.getId(), false),
-									newAmount,
-									currentMaxBid,
-									currentMinBid);
+        // Fail, bid amount is too low
+        try {
+            BigDecimal bidAmount = new BigDecimal("99.99");
+            MonetaryAmount newAmount = new MonetaryAmount(bidAmount, Currency.getInstance("USD"));
+            a2.placeBid(userDAO.loadUserById(u3.getId(), false),
+                    newAmount,
+                    currentMaxBid,
+                    currentMinBid);
 		} catch (BusinessException success) {}
 
-		// TODO: Implement test for auction dates...
+        // TODO: Implement test for auction dates...
 
-		HibernateUtil.commitTransaction();
-		HibernateUtil.closeSession();
+        HibernateUtil.commitTransaction();
+        HibernateUtil.closeSession();
 
-	}
+    }
 
 	// ********************************************************** //
 
 	public ItemTest(String x) {
 		super(x);
-	}
+    }
 
-	public static Test suite() {
-		return new TestSuite(ItemTest.class);
-	}
+    public static Test suite() {
+        return new TestSuite(ItemTest.class);
+    }
 
-	public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
 		TestRunner.run( suite() );
-	}
+    }
 
 }
