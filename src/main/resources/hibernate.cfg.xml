@@ -76,7 +76,13 @@
         <mapping resource="org/hibernate/auction/model/Bid.hbm.xml"/>
         <mapping resource="org/hibernate/auction/model/BillingDetails.hbm.xml"/>
         <mapping resource="org/hibernate/auction/model/Comment.hbm.xml"/>
+        <mapping resource="org/hibernate/auction/model/Stock.hbm.xml"/>
+        <mapping resource="org/hibernate/auction/model/StockDetail.hbm.xml"/>
         <mapping resource="org/hibernate/auction/persistence/audit/AuditLogRecord.hbm.xml"/>
+        
+        <!-- annotation classes -->
+        <!-- <mapping class="org/hibernate/auction/model/annotation/Stock" />
+        <mapping class="org/hibernate/auction/model/annotation/StockDetail" />-->
 
     </session-factory>
 
