@@ -5,6 +5,9 @@
  */
 package org.hibernate.auction.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  *
  * @author rusakovich
@@ -15,6 +18,8 @@ public class Stock implements java.io.Serializable {
     private String stockCode;
     private String stockName;
     private StockDetail stockDetail;
+    private Set<StockDailyRecord> stockDailyRecords
+            = new HashSet<StockDailyRecord>(0);
 
     public Stock() {
     }
@@ -61,4 +66,13 @@ public class Stock implements java.io.Serializable {
     public void setStockDetail(StockDetail stockDetail) {
         this.stockDetail = stockDetail;
     }
+
+    public Set<StockDailyRecord> getStockDailyRecords() {
+        return stockDailyRecords;
+    }
+
+    public void setStockDailyRecords(Set<StockDailyRecord> stockDailyRecords) {
+        this.stockDailyRecords = stockDailyRecords;
+    }
+
 }

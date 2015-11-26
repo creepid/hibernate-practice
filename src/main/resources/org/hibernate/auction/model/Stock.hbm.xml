@@ -20,6 +20,17 @@
         </property>
         
         <one-to-one name="stockDetail" class="StockDetail" cascade="save-update"></one-to-one>
+        
+        <set name="stockDailyRecords" 
+             table="stock_daily_record" 
+             inverse="true" 
+             lazy="true" 
+             fetch="select">
+            <key>
+                <column name="STOCK_ID" not-null="true" />
+            </key>
+            <one-to-many class="StockDailyRecord" />
+        </set>
             
     </class>
     
