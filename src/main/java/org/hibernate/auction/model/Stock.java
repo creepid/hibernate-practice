@@ -18,8 +18,8 @@ public class Stock implements java.io.Serializable {
     private String stockCode;
     private String stockName;
     private StockDetail stockDetail;
-    private Set<StockDailyRecord> stockDailyRecords
-            = new HashSet<StockDailyRecord>(0);
+    private Set<StockDailyRecord> stockDailyRecords = new HashSet<StockDailyRecord>(0);
+    private Set<Category> categories = new HashSet<Category>(0);
 
     public Stock() {
     }
@@ -73,6 +73,14 @@ public class Stock implements java.io.Serializable {
 
     public void setStockDailyRecords(Set<StockDailyRecord> stockDailyRecords) {
         this.stockDailyRecords = stockDailyRecords;
+    }
+
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 
 }

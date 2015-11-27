@@ -37,6 +37,16 @@ CREATE TABLE  `mkyongdb`.`stock_daily_record` (
 -- правило ON DELETE CASCADE, это значит, что автоматически с записью из таблицы 
 -- products, удалятся записи в таблице orders, в которых поле prodid=3.
 
+
+-- InnoDB is a high-reliability and high-performance storage engine for MySQL. 
+-- Key advantages of InnoDB include:
+-- Its design follows the ACID model, with transactions featuring commit, rollback, and crash-recovery capabilities to protect user data.
+-- Row-level locking (without escalation to coarser granularity locks) and Oracle-style consistent reads increase multi-user concurrency and performance.
+-- InnoDB tables arrange your data on disk to optimize common queries based on primary keys. Each InnoDB table has a primary key index called the clustered index that organizes the data to minimize I/O for primary key lookups.
+-- To maintain data integrity, InnoDB also supports FOREIGN KEY referential-integrity constraints.
+-- You can freely mix InnoDB tables with tables from other MySQL storage engines, even within the same statement. For example, you can use a join operation to combine data from InnoDB and MEMORY tables in a single query.
+
+InnoDB has been designed for CPU efficiency and maximum performance when processing large data volumes.
 DELETE FROM products WHERE prodid=3;
 UPDATE users SET userid=55 WHERE userid=1 LIMIT 1;
   REFERENCES `stock` (`STOCK_ID`) ON DELETE CASCADE ON UPDATE CASCADE

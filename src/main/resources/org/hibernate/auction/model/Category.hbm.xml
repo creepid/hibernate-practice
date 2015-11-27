@@ -102,6 +102,18 @@ category. This is protected with a unique constraint.
 		</key>
 		<one-to-many class="CategorizedItem"/>
 	</set>
+        
+         <set name="stocks" table="stock_category" 
+              inverse="true" 
+              lazy="true"
+              fetch="select">
+            <key>
+                <column name="CATEGORY_ID" not-null="true" />
+            </key>
+            <many-to-many entity-name="Stock">
+                <column name="STOCK_ID" not-null="true" />
+            </many-to-many>
+        </set>
 
 	<!--
 		This is an alternative mapping for the many-to-many association
@@ -161,13 +173,13 @@ category. This is protected with a unique constraint.
 						 class="User"
 						 access="field"/>
 
-			<property   name="dateAdded"
-						column="DATE_ADDED"
-						access="field"/>
-		</composite-element>
-	 </idbag>
-	-->
+                        <property   name="dateAdded"
+                                                column="DATE_ADDED"
+                                                access="field"/>
+                </composite-element>
+         </idbag>
+        -->
 
-</class>
+    </class>
 
 </hibernate-mapping>

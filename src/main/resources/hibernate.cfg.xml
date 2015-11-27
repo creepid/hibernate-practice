@@ -79,6 +79,7 @@
         <mapping resource="org/hibernate/auction/model/Stock.hbm.xml"/>
         <mapping resource="org/hibernate/auction/model/StockDetail.hbm.xml"/>
         <mapping resource="org/hibernate/auction/model/StockDailyRecord.hbm.xml"/>
+        <mapping resource="org/hibernate/auction/model/CategoryStock.hbm.xml"/>
         <mapping resource="org/hibernate/auction/persistence/audit/AuditLogRecord.hbm.xml"/>
         
         <!-- annotation classes -->
